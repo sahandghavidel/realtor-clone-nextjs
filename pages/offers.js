@@ -1,5 +1,9 @@
+import Layout from "../components/Layout";
+
 export default function Offers() {
   return (
-    <div>Offers</div>
-  )
+    <Layout title="recent offers" keywords="offers, cheap home">
+      Offers
+    </Layout>
+  );
 }

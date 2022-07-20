@@ -1,5 +1,7 @@
+import Layout from "../components/Layout";
+
 export default function SignIn() {
   return (
-    <div>Sign In</div>
+    <Layout>Sign In</Layout>
   )
 }

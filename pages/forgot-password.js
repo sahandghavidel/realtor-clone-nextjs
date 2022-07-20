@@ -1,5 +1,7 @@
+import Layout from "../components/Layout";
+
 export default function ForgotPassword() {
   return (
-    <div>Forgot Password</div>
+    <Layout>Forgot Password</Layout>
   )
 }
