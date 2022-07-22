@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 export default function Header() {
   const router = useRouter();
-  console.log(router);
 
   function pathMatchRoute(route) {
     if (route === router.pathname) {
