@@ -1,4 +1,6 @@
 import Head from "next/head";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "./Header";
 
 export default function Layout({ children, title, description, keywords }) {
@@ -12,6 +14,18 @@ export default function Layout({ children, title, description, keywords }) {
       </Head>
       <Header />
       {children}
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }

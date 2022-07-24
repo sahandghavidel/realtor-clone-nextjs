@@ -1,9 +1,18 @@
 import Layout from "../components/Layout";
 import Image from "next/image";
 import { useState } from "react";
+import {useRouter} from "next/router"
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import Link from "next/link";
 import OAuth from "../components/OAuth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  updateProfile,
+} from "firebase/auth";
+import { db } from "../firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import {toast} from "react-toastify"
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,11 +23,41 @@ export default function SignUp() {
 
   const { name, email, password } = formData;
 
+  const router = useRouter()
+
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }));
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredentials = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredentials.user;
+
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+
+      const formDataCopy = { ...formData };
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
+
+      await setDoc(doc(db, "users", user.uid), formDataCopy);
+      router.push("/")
+
+    } catch (error) {
+      toast.error("Something went wrong with resignation")
+    }
   }
   return (
     <Layout>
@@ -35,7 +74,7 @@ export default function SignUp() {
             />
           </div>
           <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-            <form>
+            <form onSubmit={onSubmit}>
               <input
                 className="transition ease-in-out w-full border-gray-300 rounded text-xl text-gray-700 px-4 py-2 mb-6"
                 type="text"
