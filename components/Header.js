@@ -1,7 +1,21 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 export default function Header() {
   const router = useRouter();
+  const auth = getAuth()
+  const [pageState, setPageState] = useState("Sign in")
+
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        setPageState("Profile")
+      }else{
+        setPageState("Sign in")
+      }
+    })
+  },[auth])
 
   function pathMatchRoute(route) {
     if (route === router.pathname) {
@@ -37,10 +51,10 @@ export default function Header() {
             </li>
             <li
               className={`py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent ${
-                pathMatchRoute("/sign-in") && "text-black border-b-red-500"
+                (pathMatchRoute("/sign-in") || pathMatchRoute("/profile")) && "text-black border-b-red-500"
               }`}
             >
-              <Link href={"/sign-in"}> Sign in</Link>
+              <Link href={"/profile"}>{pageState}</Link>
             </li>
           </ul>
         </div>
