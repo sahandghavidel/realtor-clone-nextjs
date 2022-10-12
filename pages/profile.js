@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { db } from "../firebase";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, updateProfile } from "firebase/auth";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function Profile() {
   const auth = getAuth();
   const router = useRouter();
+  const [changeName, setChangeName] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
   });
+
+  function onChange(e) {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  }
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -28,6 +38,30 @@ export default function Profile() {
     setLoading(false);
   }, [auth]);
   const { name, email } = formData;
+
+  async function onSubmit() {
+    try {
+      if (auth.currentUser.displayName !== name) {
+        // update the firebase auth
+
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        // update the firestore
+
+        const docRef = doc(db, "users", auth.currentUser.uid);
+
+        await updateDoc(docRef, {
+          name,
+        });
+
+        toast.success("Profile name updated")
+      }
+    } catch (error) {
+      toast.error("Could not update the profile name");
+    }
+  }
   if (loggedIn && !loading) {
     return (
       <Layout>
@@ -39,8 +73,11 @@ export default function Profile() {
                 type="text"
                 id="name"
                 value={name}
-                disabled
-                className="w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out"
+                disabled={!changeName}
+                onChange={onChange}
+                className={`w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out ${
+                  changeName && "bg-red-200 focus:bg-red-200"
+                }`}
                 placeholder="Full name"
               />
               <input
@@ -55,11 +92,20 @@ export default function Profile() {
             <div className="flex justify-between text-sm sm:text-lg mt-6 whitespace-nowrap">
               <p>
                 Do you want to change your name?
-                <span className="text-red-600 cursor-pointer hover:text-red-700 transition ease-in-out ml-1">
-                  Edit
+                <span
+                  onClick={() => {
+                    changeName && onSubmit();
+                    setChangeName((prevState) => !prevState);
+                  }}
+                  className="text-red-600 cursor-pointer hover:text-red-700 transition ease-in-out ml-1"
+                >
+                  {changeName ? "Apply change" : "Edit"}
                 </span>
               </p>
-              <p onClick={()=>auth.signOut()} className="text-blue-600 cursor-pointer hover:text-blue-800 transition ease-in-out ml-1">
+              <p
+                onClick={() => auth.signOut()}
+                className="text-blue-600 cursor-pointer hover:text-blue-800 transition ease-in-out ml-1"
+              >
                 Sign out
               </p>
             </div>
