@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged, updateProfile } from "firebase/auth";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { doc, updateDoc } from "firebase/firestore";
+import Spinner from "../components/Spinner";
 
 export default function Profile() {
   const auth = getAuth();
@@ -56,7 +57,7 @@ export default function Profile() {
           name,
         });
 
-        toast.success("Profile name updated")
+        toast.success("Profile name updated");
       }
     } catch (error) {
       toast.error("Could not update the profile name");
@@ -116,7 +117,7 @@ export default function Profile() {
   } else {
     return (
       <Layout>
-        <h1>Loading...</h1>
+        <Spinner />
       </Layout>
     );
   }
